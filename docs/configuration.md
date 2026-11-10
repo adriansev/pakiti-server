@@ -44,6 +44,14 @@ for particular distributions. The information is regularly updated usin a cron j
   by the flavour of the running kernel (uname), not by package version. Fixes published
   only for Ubuntu Pro (versions with "+esm") are included.
 
+* Fedora updateinfo (Fedora publishes no OVAL; the definition URI is the repomd.xml of the
+  updates repository of a release):
+    * https://dl.fedoraproject.org/pub/fedora/linux/updates/44/Everything/x86_64/repodata/repomd.xml, etc.
+
+  Only stable security updates are used. CVE identifiers come from the titles of the
+  referenced Bugzilla bugs; updates that name no CVE are skipped. Decompressing the
+  metadata needs the `zstd` command (or `xz` for older releases).
+
 After adding VDS definition you have to use cli for synchronize and calculate vulnerabilities.
 
     php /var/www/pakiti3/src/modules/cli/vds.php -c synchronize
