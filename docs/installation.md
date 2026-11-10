@@ -87,6 +87,18 @@ Linux distibutions.
     
     30 4 * * * root php /var/www/pakiti-server/src/modules/cli/vds.php -c synchronize && php /var/www/pakiti-server/src/modules/cli/calculateVulnerabilities.php
 
+To also register the feeds of newly reporting distributions (see `feeds.php` in
+[Configuration](configuration.md)), with output mailed only when something needs attention:
+
+    MAILTO=root
+    PHPCLI=/usr/bin/php -d memory_limit=2G -d error_reporting=24575 -d display_errors=stderr
+    P=/var/www/pakiti-server/src/modules/cli
+    30 4 * * * apache $PHPCLI $P/feeds.php -c discover; $PHPCLI $P/vds.php -c synchronize && $PHPCLI $P/calculateVulnerabilities.php
+
+Parsing the largest Ubuntu feed peaks at about 600 MB, hence `memory_limit=2G`.
+`error_reporting=24575` is `E_ALL & ~E_DEPRECATED`, which keeps PHP 8 deprecation notices of
+older code out of the mail.
+
 ## Getting started with Pakiti
 
 In order to ease initial configuration of the Pakiti server, you can use the provided script:

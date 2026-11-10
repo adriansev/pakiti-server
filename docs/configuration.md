@@ -93,6 +93,33 @@ After adding VDS definition you have to use cli for synchronize and calculate vu
 </oval_definitions>
 ```
 
+## Automatic feed registration
+`feeds.php` registers the vulnerability feed of every OS group that has reporting hosts, so
+a new distribution or release is covered without manual VDS changes:
+
+    php /var/www/pakiti-server/src/modules/cli/feeds.php -c list       # OS groups with hosts and their feed
+    php /var/www/pakiti-server/src/modules/cli/feeds.php -c discover   # register the missing feeds
+    php /var/www/pakiti-server/src/modules/cli/feeds.php -n -c discover   # dry run
+
+The OS group is matched against the rules of `VDS_FEEDS` (regex on the group name, subsource,
+definition name, URI with `$1`... and `{codename}` from `UBUNTU_CODENAMES`). Defaults:
+
+| OS group | Subsource | Feed |
+|---|---|---|
+| AlmaLinux N | Local OVAL | https://security.almalinux.org/oval/org.almalinux.alsa-N.xml |
+| Ubuntu NN.NN LTS | Ubuntu OVAL | https://security-metadata.canonical.com/oval/com.ubuntu.CODENAME.cve.oval.xml.bz2 |
+| Fedora N | Fedora updateinfo | https://dl.fedoraproject.org/pub/fedora/linux/updates/N/Everything/x86_64/repodata/repomd.xml |
+
+A feed is registered only if its URI answers HTTP 200. The command prints nothing when there
+is nothing to do, and otherwise reports:
+* feeds it registered,
+* OS names that match no OS group,
+* OS groups without a rule, or without a known Ubuntu codename,
+* feeds that do not answer,
+* registered feeds not refreshed for 2 days (`vds.php -c synchronize` only logs download failures).
+
+Warnings do not change the exit code, so a following synchronization still runs.
+
 ## Operating system grouping
 Linux distributions often use naming schemas that make the names quite fragmented. The OS names either contain minor versions that don't have direct effect on the vulnerability sources, or even denote to different OS tree (e.g. RedHat vs. CentOS). In order to use the information on vulnerabilities properly, additional mapping mechanism is necessary, which maps the OS names and the information published by the OS distribution.
 

@@ -247,4 +247,23 @@ class DefaultConfig
         "Fedora 45" => "^Fedora.* 45( |$)",
         "Fedora 46" => "^Fedora.* 46( |$)",
     );
+
+    # Vulnerability feeds registered by cli/feeds.php for the OS groups of reporting hosts.
+    # Key: regex on the OS group name. Value: subsource name, definition name, URI;
+    # $1.. are the regex captures, {codename} is looked up in $UBUNTU_CODENAMES.
+    public static $VDS_FEEDS = array(
+        '/^AlmaLinux (\d+)$/' => array("Local OVAL", 'AlmaLinux $1',
+            'https://security.almalinux.org/oval/org.almalinux.alsa-$1.xml'),
+        '/^Ubuntu (\d+\.\d+) LTS$/' => array("Ubuntu OVAL", 'Ubuntu $1',
+            'https://security-metadata.canonical.com/oval/com.ubuntu.{codename}.cve.oval.xml.bz2'),
+        '/^Fedora (\d+)$/' => array("Fedora updateinfo", 'Fedora $1',
+            'https://dl.fedoraproject.org/pub/fedora/linux/updates/$1/Everything/x86_64/repodata/repomd.xml'),
+    );
+
+    public static $UBUNTU_CODENAMES = array(
+        "20.04" => "focal",
+        "22.04" => "jammy",
+        "24.04" => "noble",
+        "26.04" => "resolute",
+    );
 }
