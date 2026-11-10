@@ -35,10 +35,14 @@ for particular distributions. The information is regularly updated usin a cron j
 * openSUSE OVAL:
     * http://ftp.suse.com/pub/projects/security/oval/opensuse.leap.42.3-patch.xml
     * http://ftp.suse.com/pub/projects/security/oval/opensuse.leap.42.2-patch.xml
-* Ubuntu OVAL:
-    * https://people.canonical.com/~ubuntu-security/oval/com.ubuntu.trusty.cve.oval.xml
-    * https://people.canonical.com/~ubuntu-security/oval/com.ubuntu.xenial.cve.oval.xml
-    * https://people.canonical.com/~ubuntu-security/oval/com.ubuntu.bionic.cve.oval.xml
+* Ubuntu OVAL (CVE feed, one file per release, named by codename):
+    * https://security-metadata.canonical.com/oval/com.ubuntu.jammy.cve.oval.xml.bz2
+    * https://security-metadata.canonical.com/oval/com.ubuntu.noble.cve.oval.xml.bz2
+    * https://security-metadata.canonical.com/oval/com.ubuntu.resolute.cve.oval.xml.bz2, etc.
+
+  Only CVEs with a fixed version are evaluated. Kernel CVEs are not: Ubuntu describes them
+  by the flavour of the running kernel (uname), not by package version. Fixes published
+  only for Ubuntu Pro (versions with "+esm") are included.
 
 After adding VDS definition you have to use cli for synchronize and calculate vulnerabilities.
 
