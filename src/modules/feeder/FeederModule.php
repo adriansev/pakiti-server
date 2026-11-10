@@ -301,12 +301,24 @@ class FeederModule extends DefaultModule
         $this->_report_cpu = $data['content']['cpus']['0']['name'];
         $this->_report_hostname = $data['content']['operatingsystem']['fqdn'];
         $this->_report_kernel = $data['content']['operatingsystem']['kernel_version'];
-        $this->_report_type = "";
         $this->_report_site = $data['tag'];
         $this->_report_tag = "";
         $this->_report_os = $data['content']['operatingsystem']['full_name'];
         $this->_report_arch = implode(", ", array_filter([$this->_report_arch,$this->_report_cpu]));
-        foreach ($data['content']['softwares'] as $s) { $this->_report_pkgs .= $s['name']." ".$s['version']." ".$s['arch']."\n"; }
+
+        # GLPI tags each software entry with its origin (rpm, deb, snap, nix, ...). Only the
+        # native package manager is comparable with vendor advisories, and its type selects the
+        # version comparison algorithm.
+        $softwares = isset($data['content']['softwares']) ? $data['content']['softwares'] : array();
+        $origins = array_count_values(array_column($softwares, 'from'));
+        $native = (isset($origins['deb']) ? $origins['deb'] : 0) > (isset($origins['rpm']) ? $origins['rpm'] : 0) ? 'deb' : 'rpm';
+        $this->_report_type = ($native == 'deb') ? Constants::$PACKAGER_SYSTEM_DPKG : Constants::$PACKAGER_SYSTEM_RPM;
+        foreach ($softwares as $s) {
+            if (!isset($s['from']) || $s['from'] !== $native) {
+                continue;
+            }
+            $this->_report_pkgs .= $s['name']." ".$s['version']." ".$s['arch']."\n";
+        }
     }
 
     /**

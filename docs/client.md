@@ -20,3 +20,13 @@ GLPI is either in your linux distribution or install it according to https://git
     glpi-inventory --json -t Tag > /tmp/glpi
 #### Send created inventory to pakiti
     glpi-injector -f /tmp/glpi -u https://yourdomain.com/feed/
+
+#### Or in one step, without a temporary file
+    glpi-inventory --json -t Tag | glpi-injector --stdin -u https://yourdomain.com/feed/
+
+The tag (`-t`) becomes the host group of the host in Pakiti.
+
+Pakiti uses the `from` field of each software entry: the package manager with the most
+entries (`rpm` or `deb`) sets the package type of the report, which selects the version
+comparison algorithm, and entries from any other origin (snap, flatpak, nix, ...) are
+ignored, as no vendor advisory describes them.
