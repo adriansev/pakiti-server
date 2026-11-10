@@ -240,5 +240,11 @@ class DefaultConfig
         "AlmaLinux 8" => "AlmaLinux.* 8.*",
         "AlmaLinux 9" => "AlmaLinux.* 9.*",
         "AlmaLinux 10" => "AlmaLinux.* 10.*",
+        # Fedora (group names equal the <release> of Fedora updateinfo)
+        "Fedora 42" => "^Fedora.* 42( |$)",
+        "Fedora 43" => "^Fedora.* 43( |$)",
+        "Fedora 44" => "^Fedora.* 44( |$)",
+        "Fedora 45" => "^Fedora.* 45( |$)",
+        "Fedora 46" => "^Fedora.* 46( |$)",
     );
 }

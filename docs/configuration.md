@@ -92,6 +92,9 @@ The mapping is specified by the OS_GROUPS_MAPPING configuration option and has t
 
     php /var/www/pakiti3/src/modules/cli/recalculateOsGroupsMapping.php
 
+The default mapping covers Fedora 42 to 46 (`Fedora Linux 44 (Workstation Edition)` maps to
+`Fedora 44`). New Fedora releases need a new entry.
+
 ## Users
 In Config.php have to be set one of these modes user management
 
