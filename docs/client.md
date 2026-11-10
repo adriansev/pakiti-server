@@ -30,3 +30,6 @@ Pakiti uses the `from` field of each software entry: the package manager with th
 entries (`rpm` or `deb`) sets the package type of the report, which selects the version
 comparison algorithm, and entries from any other origin (snap, flatpak, nix, ...) are
 ignored, as no vendor advisory describes them.
+
+GLPI reports rpm versions without the epoch. When an installed rpm version has no epoch,
+the epoch of the advisory is ignored and only version-release are compared.

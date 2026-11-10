@@ -167,6 +167,11 @@ class VulnerabilitiesManager extends DefaultManager
                 return $this->dpkgvercmp($ver_a, $rel_a, $ver_b, $rel_b);
                 break;
             case "rpm":
+                # GLPI inventories carry no epoch: an installed version without one cannot be
+                # compared on epoch, so the advisory epoch is ignored in that case.
+                if (strpos($ver_a, ':') === false) {
+                    $ver_b = Utils::removeEpoch($ver_b);
+                }
                 $cmp_ret = $this->rpmvercmp($this->addepoch($ver_a), $this->addepoch($ver_b));
                 if ($cmp_ret == 0) {
                     return $this->rpmvercmp($rel_a, $rel_b);
