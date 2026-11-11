@@ -67,6 +67,19 @@ class OvalLocal extends SubSource implements ISubSource
                 $packages = array();
                 $this->processCriterias($this->_xpath, $root_criteria, $def, $oses, $packages);
             }
+
+            # gcc-toolset-N advisories (AlmaLinux, RHEL) also list runtime libraries without
+            # the gcc-toolset-N- prefix (liblsan, libasan8, libtsan2). liblsan is also the
+            # name of the base gcc runtime, whose fixes are a separate version line: keep
+            # only the prefixed packages. A host with the toolset installed still matches
+            # the advisory, and its CVEs, through them.
+            if (preg_match('/^\S+: (gcc-toolset-\d+)-/', $def['title'], $toolset) && isset($def['osGroup'])) {
+                foreach ($def['osGroup'] as $os => $pkgs) {
+                    $def['osGroup'][$os] = array_values(array_filter($pkgs, function ($p) use ($toolset) {
+                        return strpos($p['name'], $toolset[1] . '-') === 0;
+                    }));
+                }
+            }
             array_push($defs, $def);
         }
 
