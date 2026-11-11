@@ -36,6 +36,13 @@ class HTMLModule extends DefaultModule
         $this->_acl = new Acl($pakiti);
         $this->_errors = array();
         $this->_messages = array();
+
+        # Read-only visitors change nothing: every change in the GUI is a POST
+        if ($this->_acl->isReadOnly() && $_SERVER['REQUEST_METHOD'] === 'POST') {
+            header('HTTP/1.0 403 Forbidden');
+            print($this->error403);
+            exit;
+        }
     }
 
     /**
@@ -139,6 +146,9 @@ class HTMLModule extends DefaultModule
 
     public function getUserName()
     {
+        if ($this->_acl->isReadOnly()) {
+            return "Read-only";
+        }
         if ($this->_acl->getUser() != null) {
             return $this->_acl->getUser()->getName();
         }

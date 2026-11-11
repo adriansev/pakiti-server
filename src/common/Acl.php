@@ -7,6 +7,7 @@ class Acl
 {
     private $_pakiti;
     private $_user = null;
+    private $_readOnly = false;
 
     public function getPakiti()
     {
@@ -45,7 +46,20 @@ class Acl
             }
 
             $this->_user = $user;
+
+            # No known user: read-only view of everything, if enabled
+            if ($user == null && Config::$AUTHZ_ANONYMOUS_READONLY) {
+                $this->_readOnly = true;
+            }
         }
+    }
+
+    /**
+     * True for a request without a known user when AUTHZ_ANONYMOUS_READONLY is enabled
+     */
+    public function isReadOnly()
+    {
+        return $this->_readOnly;
     }
 
     /**
@@ -55,6 +69,11 @@ class Acl
     public function getUserId()
     {
         if (Config::$AUTHZ_MODE == Constants::$AUTHZ_MODE_NONE) {
+            return -1;
+        }
+
+        # Read-only visitors see all hosts
+        if ($this->_readOnly) {
             return -1;
         }
 
@@ -88,6 +107,10 @@ class Acl
     {
         if (Config::$AUTHZ_MODE == Constants::$AUTHZ_MODE_NONE) {
             return true;
+        }
+
+        if ($this->_readOnly) {
+            return $source != "users";
         }
 
         if ($this->_user == null) {

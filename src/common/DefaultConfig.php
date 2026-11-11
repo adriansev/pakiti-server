@@ -26,6 +26,11 @@ class DefaultConfig
     public static $AUTHZ_NAME = "cn";
     public static $AUTHZ_EMAIL = "mail";
 
+    # With an AUTHZ_MODE other than none: a request whose AUTHZ_UID variable names no
+    # known user (e.g. no web server login) gets a read-only view of all hosts instead of
+    # no access. Every page except Users can be viewed; every change (POST) is refused.
+    public static $AUTHZ_ANONYMOUS_READONLY = false;
+
     public static $DEBUG = false;
 
     # Directory, where to put the reports (only applied for asynchronous mode)
