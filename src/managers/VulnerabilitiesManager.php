@@ -29,6 +29,7 @@ class VulnerabilitiesManager extends DefaultManager
             # stream (e.g. el9_7 rows for a 9.7-stream kernel), so a CVE fixed in
             # both el9_7 and el9_8 does not flag a patched 9.7 host just because
             # its NVR is below the 9.8 fix's NVR.
+            $potentialVulnerabilities = $this->filterByModuleBuild($pkg, $potentialVulnerabilities);
             $potentialVulnerabilities = $this->filterByMinorStream($pkg, $potentialVulnerabilities);
             foreach ($potentialVulnerabilities as $vulnerability) {
                 $confirmed = false;
@@ -79,6 +80,59 @@ class VulnerabilitiesManager extends DefaultManager
      * @param array $vulnerabilities
      * @return array
      */
+    /**
+     * Keep only vulnerability rows of the same kind of build as the installed rpm.
+     *
+     * A package can exist both as a regular build and as module stream builds (the
+     * default postgresql 13 and the postgresql:15/:16/:18 streams). Their fixes are
+     * independent version lines: a regular postgresql-server 13.23 must not be
+     * compared with "postgresql-server < 18.6-1.module_el9...". Regular builds are
+     * compared with regular rows only, module builds with module rows of the same
+     * major version only. Streams that share a major version (php:8.1 / php:8.2) are
+     * not separated.
+     *
+     * @param Pkg $pkg
+     * @param array $vulnerabilities
+     * @return array
+     */
+    private function filterByModuleBuild($pkg, $vulnerabilities)
+    {
+        if ($pkg->getPkgTypeName() !== 'rpm') {
+            return $vulnerabilities;
+        }
+
+        $pkgIsModule = self::isModuleBuild($pkg->getRelease());
+        $matching = array();
+        foreach ($vulnerabilities as $v) {
+            if (self::isModuleBuild($v->getRelease()) === $pkgIsModule) {
+                $matching[] = $v;
+            }
+        }
+
+        # Module streams of one package coexist (postgresql:15, :16, :18): compare only
+        # with the rows of the installed major version
+        if ($pkgIsModule) {
+            $major = explode('.', Utils::removeEpoch($pkg->getVersion()))[0];
+            $sameMajor = array();
+            foreach ($matching as $v) {
+                if (explode('.', Utils::removeEpoch($v->getVersion()))[0] === $major) {
+                    $sameMajor[] = $v;
+                }
+            }
+            $matching = $sameMajor;
+        }
+        return $matching;
+    }
+
+    /**
+     * True for a release of a module stream build: ".module_el9.4.0+109+624ac33a"
+     * (AlmaLinux) or ".module+el9.4.0+..." (RHEL).
+     */
+    private static function isModuleBuild($release)
+    {
+        return preg_match('/\.module[_+]el\d/', $release) === 1;
+    }
+
     private function filterByMinorStream($pkg, $vulnerabilities)
     {
         if ($pkg->getPkgTypeName() !== 'rpm') {
