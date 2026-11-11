@@ -25,12 +25,16 @@ class VulnerabilitiesManager extends DefaultManager
             $cveDefsManager->removePkg($pkg->getId());
             $potentialVulnerabilities = $vulnerabilityDao->getVulnerabilitiesByNameArchId($pkg->getName(), $pkg->getArchId());
 
+            $potentialVulnerabilities = $this->filterByModuleBuild($pkg, $potentialVulnerabilities);
+
             # Keep only vulnerability rows that belong to the host's own minor
             # stream (e.g. el9_7 rows for a 9.7-stream kernel), so a CVE fixed in
             # both el9_7 and el9_8 does not flag a patched 9.7 host just because
-            # its NVR is below the 9.8 fix's NVR.
-            $potentialVulnerabilities = $this->filterByModuleBuild($pkg, $potentialVulnerabilities);
-            $potentialVulnerabilities = $this->filterByMinorStream($pkg, $potentialVulnerabilities);
+            # its NVR is below the 9.8 fix's NVR. Only valid where minor releases
+            # are maintained in parallel (RHEL EUS), see Config::$FILTER_BY_MINOR_STREAM.
+            if (Config::$FILTER_BY_MINOR_STREAM) {
+                $potentialVulnerabilities = $this->filterByMinorStream($pkg, $potentialVulnerabilities);
+            }
             foreach ($potentialVulnerabilities as $vulnerability) {
                 $confirmed = false;
                 switch ($vulnerability->getOperator()) {

@@ -248,6 +248,13 @@ class DefaultConfig
         "Fedora 46" => "^Fedora.* 46( |$)",
     );
 
+    # Compare rpm packages only with advisory rows of their own minor release stream
+    # (.el9_7 package -> .el9_7 rows). Enable only where minor releases are maintained in
+    # parallel (RHEL EUS). On distributions without parallel minor streams (AlmaLinux,
+    # Rocky, RHEL without EUS) the el9_N tags are sequential, and the filter hides every
+    # fix released after the minor release a package was built for.
+    public static $FILTER_BY_MINOR_STREAM = false;
+
     # Vulnerability feeds registered by cli/feeds.php for the OS groups of reporting hosts.
     # Key: regex on the OS group name. Value: subsource name, definition name, URI;
     # $1.. are the regex captures, {codename} is looked up in $UBUNTU_CODENAMES.
